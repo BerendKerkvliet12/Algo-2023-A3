@@ -59,9 +59,10 @@ class DroneExtinguisher:
         Returns 
           float: the Euclidean distance between the two points
         """
-        
-        # TODO
-        raise NotImplementedError()
+        x1, y1 = point1
+        x2, y2 = point2
+        return ((x2 - x1)**2 + (y2 - y1)**2)**0.5
+      
 
 
     def fill_travel_costs_in_liters(self):
@@ -73,9 +74,10 @@ class DroneExtinguisher:
                 
         The function does not return anything.  
         """
-        
-        # TODO
-        raise NotImplementedError()
+        for bag_location in self.bag_locations:
+            trip_distance = (self.compute_euclidean_distance(bag_location, self.forest_location) * 2)
+            travel_cost = np.ceil(trip_distance * self.liter_cost_per_km)
+            self.travel_costs_in_liters.append(travel_cost)
 
 
     def compute_sequence_idle_time_in_liters(self, i, j):
@@ -116,9 +118,12 @@ class DroneExtinguisher:
         Returns
           - integer: the cost of being idle on a day corresponding to idle_time_in_liters
         """
-        
-        # TODO
-        raise NotImplementedError()
+        for i in range(self.num_bags):
+          for j in range(i, self.num_bags):
+              work_done = sum(self.bags[i:j + 1]) + sum(self.travel_costs_in_liters[i:j + 1])
+              idle_cost = self.liter_budget_per_day - work_done
+              if idle_cost >= 0:
+                  self.idle_cost[i, j] = idle_cost
     
     def compute_sequence_usage_cost(self, i: int, j: int, k: int) -> float:
         """
@@ -146,9 +151,21 @@ class DroneExtinguisher:
         In this function, we fill the memory structures self.idle_cost and self.optimal_cost making use of functions defined above. 
         This function does not return anything. 
         """
+        self.optimal_cost.fill(np.inf)
+        # Base case
+        self.optimal_cost[0, :] = 0
+
         
-        # TODO
-        raise NotImplementedError()
+        self.compute_idle_costs()
+       # Fill in the optimal_cost array using dynamic programming
+        for i in range(1, self.num_bags + 1):
+            for k in range(self.num_drones):
+                for j in range(i):
+                    if self.idle_cost[j, i - 1] != -1:
+                        cost = self.optimal_cost[j, k] + self.idle_cost[j, i - 1] + sum(self.usage_cost[j:i, k])
+                        if cost < self.optimal_cost[i, k]:
+                            self.optimal_cost[i, k] = cost
+                            self.backtrace_memory[(i, k)] = j
 
     def lowest_cost(self) -> float:
         """

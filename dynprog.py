@@ -96,9 +96,10 @@ class DroneExtinguisher:
         Returns:
           int: the amount of time (measured in liters) that we are idle on the day   
         """
-        
-        # TODO
-        raise NotImplementedError()
+        work_done = sum(self.bags[i:j + 1]) + sum(self.travel_costs_in_liters[i:j + 1])
+        idle_time_in_liters = self.liter_budget_per_day - work_done
+
+        return idle_time_in_liters
 
     def compute_idle_cost(self, i, j, idle_time_in_liters):
         """
@@ -120,10 +121,9 @@ class DroneExtinguisher:
         """
         for i in range(self.num_bags):
           for j in range(i, self.num_bags):
-              work_done = sum(self.bags[i:j + 1]) + sum(self.travel_costs_in_liters[i:j + 1])
-              idle_cost = self.liter_budget_per_day - work_done
+              idle_cost = self.compute_sequence_idle_time_in_liters
               if idle_cost >= 0:
-                  self.idle_cost[i, j] = idle_cost
+                self.idle_cost[i, j] = idle_cost
     
     def compute_sequence_usage_cost(self, i: int, j: int, k: int) -> float:
         """
@@ -179,10 +179,9 @@ class DroneExtinguisher:
         Returns:
           - float: the lowest cost
         """
-        
-        # TODO
-        raise NotImplementedError()
-
+        self.dynamic_programming()
+        return np.min(self.optimal_cost[-1, :])
+      
 
     def backtrace_solution(self) -> typing.List[int]:
         """

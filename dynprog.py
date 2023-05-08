@@ -139,9 +139,12 @@ class DroneExtinguisher:
         Returns
           - float: the cost of usign drone k for bags[i:j+1] 
         """
-        
-        # TODO
-        raise NotImplementedError()
+        cost = 0
+        for bag_index in range(i, j + 1):
+            cost += self.usage_cost[bag_index][k]
+
+       
+        return cost
 
 
     def dynamic_programming(self):
